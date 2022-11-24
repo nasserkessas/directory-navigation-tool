@@ -2,15 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define NUM_LINES 16
 #define NAME_LENGTH 16
-#define LINE_LENGTH 256
+#define DIR_LENGTH 256
 #define SAVEFILE "./.dirsave"
 
 struct dirEntry {
     char name[NAME_LENGTH];
-    char dir[LINE_LENGTH];
+    char dir[DIR_LENGTH];
 };
 
 struct file {
@@ -28,12 +29,11 @@ void list(struct file data);
 int isvalid (char *str);
 
 
-void usage(char *path) {
-    // printf("\nUsage: %s [OPTIONS]\n\n\t-r : Range (-r < x < r) \n\t-d : Domain (0 < x < d) (in π)\n\t-x : X unit size\n\t-y : Y unit size\n\n", path);
-}
+// void usage(char *path) {
+//     // printf("\nUsage: %s [OPTIONS]\n\n\t-r : Range (-r < x < r) \n\t-d : Domain (0 < x < d) (in π)\n\t-x : X unit size\n\t-y : Y unit size\n\n", path);
+// }
 
 int main(int argc, char **argv) {
-
 
     if (argc == 1) {
         usage(argv[0]);
@@ -47,9 +47,15 @@ int main(int argc, char **argv) {
             if (isvalid(argv[i+1])){
                 struct file data = readFile();
 
+                char cwd[DIR_LENGTH];
+                if (getcwd(cwd, sizeof(cwd)) == NULL){
+                    printf("Failed to get current woking directory");
+                    return 1;
+                }
+
                 struct dirEntry newDir;
                 strcpy(newDir.name, argv[i+1]);
-                strcpy(newDir.dir, "this is a directory");
+                strcpy(newDir.dir, cwd);
 
                 data.entries[data.lineCount] = newDir;
                 data.lineCount++;
@@ -81,9 +87,9 @@ struct file readFile() {
     
     fileContents.lineCount = 0;
 
-    char line[LINE_LENGTH];
+    char line[DIR_LENGTH];
 
-    while (fgets(line, LINE_LENGTH, fp) != NULL){
+    while (fgets(line, DIR_LENGTH, fp) != NULL){
         if(line[strlen(line)-1] == '\n') line[strlen(line)-1] = '\0';
         struct dirEntry thisLine;
         strcpy(thisLine.name, strtok(line, "|"));
