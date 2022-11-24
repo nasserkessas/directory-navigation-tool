@@ -32,7 +32,7 @@ int isvalid (char *str);
 // new shell option
 
 void usage(char *path) {
-    printf("\nUsage: %s [COMMANDS]\n\n\t%s store \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\t%s move \tChanges directory to first stored value \n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\n", path, path, path);
+    printf("\nUsage: %s [COMMANDS]\n\n\tstore \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t\t--set-default  Sets added directory to default position\n\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\tmove \tChanges directory to default or first listed directory\n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\t\t\t--new           Opens saved directory in a new shell\n\n", path);
 }
 
 int main(int argc, char **argv) {
