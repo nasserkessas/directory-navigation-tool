@@ -74,13 +74,18 @@ int main(int argc, char **argv) {
                 }
 
                 if (foundKey) {
-                    printf("Directory key \"%s\" already exists", argv[3]);
+                    printf("Directory key \"%s\" already exists\n", argv[3]);
+                    return 1;
+                }
+
+                if(data.lineCount == NUM_LINES-1) {
+                    printf("The maximum amount of saved directories (%d) has already been reached\n", NUM_LINES-1);
                     return 1;
                 }
 
                 char cwd[DIR_LENGTH];
                 if (getcwd(cwd, sizeof(cwd)) == NULL) {
-                    printf("Failed to get current woking directory");
+                    printf("Failed to get current woking directory\n");
                     return 1;
                 }
 
@@ -99,8 +104,46 @@ int main(int argc, char **argv) {
             else {
 
                 if (strcmp(argv[4], "--set-default") == 0){
+                    struct file data = readFile();
+
+                    int foundKey = 0;
+                    for (int i = 0; i < data.lineCount; i++) {
+                        if (strcmp(data.entries[i].name, argv[3]) == 0) {
+                            foundKey = 1;
+                        }
+                    }
+
+                    if (foundKey) {
+                        printf("Directory key \"%s\" already exists\n", argv[3]);
+                        return 1;
+                    }
+
+                    if(data.lineCount == NUM_LINES-1) {
+                        printf("The maximum amount of saved directories (%d) has already been reached\n", NUM_LINES-1);
+                        return 1;
+                    }
+
+                    char cwd[DIR_LENGTH];
+                    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                        printf("Failed to get current woking directory\n");
+                        return 1;
+                    }
+
+                    struct dirEntry newDir;
+                    strcpy(newDir.name, argv[3]);
+                    strcpy(newDir.dir, cwd);
+
+                    for (int i = data.lineCount; i > 0; i--) {
+                        data.entries[i] = data.entries[i-1];
+                    }
+                    
+                    data.entries[0] = newDir;
+                    data.lineCount++;
+                    printf("Added default directory \"%s\": %s\n", data.entries[0].name, data.entries[0].dir);
+
+                    writeFile(data);
+
                     return 0;
-                    // set added directory to default position
                 }
 
                 else {
