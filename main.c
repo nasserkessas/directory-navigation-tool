@@ -209,34 +209,34 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-                struct file data = readFile();
-                
-                int foundKey = 0;
-                for (int i = 0; i < data.lineCount; i++) {
-                    if (strcmp(data.entries[i].name, argv[3]) == 0) {
-                        foundKey = i;
-                    }
+            struct file data = readFile();
+            
+            int foundKey = 0;
+            for (int i = 0; i < data.lineCount; i++) {
+                if (strcmp(data.entries[i].name, argv[3]) == 0) {
+                    foundKey = i;
                 }
-
-                if (!foundKey) {
-                    printf("Directory key \"%s\" not found\n", argv[3]);
-                    return 1;
-                }
-                
-                char command[260] = "cd ";
-                strcat(command, data.entries[foundKey].dir);
-                strcat(command, "\r");
-
-                inject_shell(command);
-
-                return 0;
             }
 
-            else {
-                printf("Invalid option for %s move: %s\n", path, argv[2]);
+            if (!foundKey) {
+                printf("Directory key \"%s\" not found\n", argv[3]);
                 return 1;
             }
+            
+            char command[260] = "cd ";
+            strcat(command, data.entries[foundKey].dir);
+            strcat(command, "\r");
+
+            inject_shell(command);
+
+            return 0;
         }
+
+        else {
+            printf("Invalid option for %s move: %s\n", path, argv[2]);
+            return 1;
+        }
+    }
 
     else {
         printf("Unknown command: %s %s\n", path, name);
