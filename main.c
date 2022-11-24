@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 
 #define NUM_LINES 16
 #define NAME_LENGTH 16
@@ -154,7 +153,8 @@ int main(int argc, char **argv) {
             strcat(command, data.entries[foundKey].dir);
             strcat(command, "\r");
 
-            inject_shell(command);
+            char *args[] = {command, NULL};
+            execvp(args[0], args);
 
             writeFile(data);
             return 0;
@@ -172,13 +172,6 @@ int main(int argc, char **argv) {
     }
 }
 
-
-void inject_shell(char *cmd){
-  int i = 0;
-  while (cmd[i] != '\0'){
-    ioctl(0, TIOCSTI, &cmd[i++]);
-  }
-}
 
 struct file readFile() {
     FILE *fp = fopen(SAVEFILE, "r");
