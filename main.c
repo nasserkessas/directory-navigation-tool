@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #define NUM_LINES 16
 #define NAME_LENGTH 16
@@ -32,7 +33,7 @@ int isvalid (char *str);
 // new shell option
 
 void usage(char *path) {
-    printf("\nUsage: %s [COMMANDS]\n\n\tstore \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t\t--set-default  Sets added directory to default position\n\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\tmove \tChanges directory to default or first listed directory\n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\t\t\t--new           Opens saved directory in a new shell\n\n", path);
+    printf("\nUsage: %s [COMMANDS]\n\n\tstore \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t\t--set-default  Sets added directory to default position\n\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\tmove \tChanges directory to default or first listed directory\n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\n", path);
 }
 
 int main(int argc, char **argv) {
@@ -178,10 +179,25 @@ int main(int argc, char **argv) {
     }
 
     if (strcmp(name, "move") == 0) {
-        if (argv[2] == NULL){
-            // Change directory to first stored value
+
+        if (argv[2] == NULL) {
+
+            struct file data = readFile();
+
+            if (data.lineCount == 0) {
+                printf("There are no saved directories\n");
+                return 1;
+            }
+            
+            char command[260] = "cd ";
+            strcat(command, data.entries[0].dir);
+            strcat(command, "\r");
+
+            inject_shell(command);
+
             return 0;
         }
+
         if (strcmp(argv[2], "-n") == 0) {
             if (argv[3] == NULL) {
                 printf("%s move -n must have a NAME arguement\n", path);
@@ -193,7 +209,6 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            if (argv[4] == NULL) {
                 struct file data = readFile();
                 
                 int foundKey = 0;
@@ -212,32 +227,16 @@ int main(int argc, char **argv) {
                 strcat(command, data.entries[foundKey].dir);
                 strcat(command, "\r");
 
-                char *args[] = {command, NULL};
-                execvp(args[0], args);
+                inject_shell(command);
 
-                writeFile(data);
                 return 0;
             }
 
             else {
-
-                if (strcmp(argv[4], "--new") == 0) {
-                    // Open saved directory in a new shell
-                    return 0;
-                }
-
-                else {
-                    printf("Invalid option for %s move -n: %s\n", path, argv[4]);
-                    return 1;
-                }
+                printf("Invalid option for %s move: %s\n", path, argv[2]);
+                return 1;
             }
         }
-
-        else {
-            printf("Invalid option for %s move: %s\n", path, argv[2]);
-            return 1;
-        }
-    }
 
     else {
         printf("Unknown command: %s %s\n", path, name);
@@ -245,6 +244,12 @@ int main(int argc, char **argv) {
     }
 }
 
+void inject_shell(char *cmd){
+  int i = 0;
+  while (cmd[i] != '\0'){
+    ioctl(0, TIOCSTI, &cmd[i++]);
+  }
+}
 
 struct file readFile() {
     FILE *fp = fopen(SAVEFILE, "r");
