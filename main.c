@@ -63,36 +63,51 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            struct file data = readFile();
+            if (argv[4] == NULL) {
+                struct file data = readFile();
 
-            int foundKey = 0;
-            for (int i = 0; i < data.lineCount; i++) {
-                if (strcmp(data.entries[i].name, argv[3]) == 0) {
-                    foundKey = 1;
+                int foundKey = 0;
+                for (int i = 0; i < data.lineCount; i++) {
+                    if (strcmp(data.entries[i].name, argv[3]) == 0) {
+                        foundKey = 1;
+                    }
+                }
+
+                if (foundKey) {
+                    printf("Directory key \"%s\" already exists", argv[3]);
+                    return 1;
+                }
+
+                char cwd[DIR_LENGTH];
+                if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                    printf("Failed to get current woking directory");
+                    return 1;
+                }
+
+                struct dirEntry newDir;
+                strcpy(newDir.name, argv[3]);
+                strcpy(newDir.dir, cwd);
+
+                data.entries[data.lineCount] = newDir;
+                data.lineCount++;
+
+                writeFile(data);
+                printf("Added \"%s\": %s\n", data.entries[data.lineCount-1].name, data.entries[data.lineCount-1].dir);
+                return 0;
+            }
+
+            else {
+
+                if (strcmp(argv[4], "--set-default") == 0){
+                    return 0;
+                    // set added directory to default position
+                }
+
+                else {
+                    printf("Invalid option for %s store -a: %s\n", path, argv[4]);
+                    return 1;
                 }
             }
-
-            if (foundKey) {
-                printf("Directory key \"%s\" already exists", argv[3]);
-                return 1;
-            }
-
-            char cwd[DIR_LENGTH];
-            if (getcwd(cwd, sizeof(cwd)) == NULL) {
-                printf("Failed to get current woking directory");
-                return 1;
-            }
-
-            struct dirEntry newDir;
-            strcpy(newDir.name, argv[3]);
-            strcpy(newDir.dir, cwd);
-
-            data.entries[data.lineCount] = newDir;
-            data.lineCount++;
-
-            writeFile(data);
-            printf("Added \"%s\": %s\n", data.entries[data.lineCount-1].name, data.entries[data.lineCount-1].dir);
-            return 0;
         }
 
         if (strcmp(argv[2], "-d") == 0) {
@@ -135,29 +150,44 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            struct file data = readFile();
-            
-            int foundKey = 0;
-            for (int i = 0; i < data.lineCount; i++) {
-                if (strcmp(data.entries[i].name, argv[3]) == 0) {
-                    foundKey = i;
+            if (argv[4] == NULL) {
+                struct file data = readFile();
+                
+                int foundKey = 0;
+                for (int i = 0; i < data.lineCount; i++) {
+                    if (strcmp(data.entries[i].name, argv[3]) == 0) {
+                        foundKey = i;
+                    }
+                }
+
+                if (!foundKey) {
+                    printf("Directory key \"%s\" not found\n", argv[3]);
+                    return 1;
+                }
+                
+                char command[260] = "cd ";
+                strcat(command, data.entries[foundKey].dir);
+                strcat(command, "\r");
+
+                char *args[] = {command, NULL};
+                execvp(args[0], args);
+
+                writeFile(data);
+                return 0;
+            }
+
+            else {
+
+                if (strcmp(argv[4], "--new") == 0) {
+                    // Open saved directory in a new shell
+                    return 0;
+                }
+
+                else {
+                    printf("Invalid option for %s move -n: %s\n", path, argv[4]);
+                    return 1;
                 }
             }
-
-            if (!foundKey) {
-                printf("Directory key \"%s\" not found\n", argv[3]);
-                return 1;
-            }
-            
-            char command[260] = "cd ";
-            strcat(command, data.entries[foundKey].dir);
-            strcat(command, "\r");
-
-            char *args[] = {command, NULL};
-            execvp(args[0], args);
-
-            writeFile(data);
-            return 0;
         }
 
         else {
