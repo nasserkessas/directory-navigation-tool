@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
             }
 
             if (!foundKey) {
-                printf("Directory key \"%s\" not found", argv[3]);
+                printf("Directory key \"%s\" not found\n", argv[3]);
                 return 1;
             }
             
