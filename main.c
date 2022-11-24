@@ -23,16 +23,50 @@ struct file readFile();
 
 void writeFile(struct file data);
 
+void list(struct file data);
+
 int isvalid (char *str);
 
 
+void usage(char *path) {
+    // printf("\nUsage: %s [OPTIONS]\n\n\t-r : Range (-r < x < r) \n\t-d : Domain (0 < x < d) (in π)\n\t-x : X unit size\n\t-y : Y unit size\n\n", path);
+}
+
 int main(int argc, char **argv) {
 
-    struct file data = readFile();
-    for (int i = 0; i < data.lineCount; i++){
-        printf("%s: %s\n", data.entries[i].name, data.entries[i].dir);
+
+    if (argc == 1) {
+        usage(argv[0]);
+        return 1;
     }
-    
+
+    for (int i=1; i<argc; i+=2) {
+        char *name = argv[i];
+
+        if (strcmp(name, "add") == 0){
+            if (isvalid(argv[i+1])){
+                struct file data = readFile();
+
+                struct dirEntry newDir;
+                strcpy(newDir.name, argv[i+1]);
+                strcpy(newDir.dir, "this is a directory");
+
+                data.entries[data.lineCount] = newDir;
+                data.lineCount++;
+
+                writeFile(data);
+                printf("Added \"%s\": %s\n", data.entries[data.lineCount-1].name, data.entries[data.lineCount-1].dir);
+            } else {
+                printf("Invalid arguement for add: \"%s\"\n", argv[i+1]);
+            }
+        }
+
+        if (strcmp(name, "list") == 0){
+            struct file data = readFile();
+            list(data);    
+        }
+
+    }
     return 0;
 }
 
@@ -70,4 +104,22 @@ void writeFile(struct file data){
     }
 
     fclose(fp);
+}
+
+void list(struct file data){
+    for (int i = 0; i < data.lineCount; i++){
+        printf("[%d] - \"%s\": %s\n", i+1, data.entries[i].name, data.entries[i].dir);
+    }
+}
+
+int isvalid (char *str){
+    for (int i = 0; i < strlen(str); i++){
+        if (! (((str[i] >= '0') && (str[i] <= '9')) || 
+            ((str[i] >= 'a') && (str[i] <= 'z')) || 
+            (str[i] == ' ')                      || 
+            ((str[i] >= 'A') && (str[i] <= 'Z')))) {
+        return 0; 
+        }
+    }
+    return 1;
 }
