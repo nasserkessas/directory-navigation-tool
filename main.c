@@ -29,22 +29,34 @@ void list(struct file data);
 int isvalid (char *str);
 
 
-// void usage(char *path) {
-//     // printf("\nUsage: %s [OPTIONS]\n\n\t-r : Range (-r < x < r) \n\t-d : Domain (0 < x < d) (in π)\n\t-x : X unit size\n\t-y : Y unit size\n\n", path);
-// }
+void usage(char *path) {
+    printf("\nUsage: %s [COMMANDS]\n\n\t%s store \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\t%s move \tChanges directory to first stored value \n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\n", path, path, path);
+}
 
 int main(int argc, char **argv) {
 
+    char *path = argv[0];
+
     if (argc == 1) {
-        usage(argv[0]);
+        usage(path);
         return 1;
     }
 
-    for (int i=1; i<argc; i+=2) {
-        char *name = argv[i];
+        char *name = argv[1];
 
-        if (strcmp(name, "add") == 0){
-            if (isvalid(argv[i+1])){
+        if (strcmp(name, "store") == 0){
+            if (strcmp(argv[2], "-a") == 0){
+
+                if (argv[3] == NULL){
+                    printf("%s add -a must have a NAME arguement\n", path);
+                    return 1;
+                }
+
+                if (!isvalid(argv[3])){
+                    printf("Invalid arguement for %s add -a: \"%s\"\n", path, argv[3]);
+                    return 1;
+                }
+
                 struct file data = readFile();
 
                 char cwd[DIR_LENGTH];
@@ -54,7 +66,7 @@ int main(int argc, char **argv) {
                 }
 
                 struct dirEntry newDir;
-                strcpy(newDir.name, argv[i+1]);
+                strcpy(newDir.name, argv[3]);
                 strcpy(newDir.dir, cwd);
 
                 data.entries[data.lineCount] = newDir;
@@ -62,18 +74,15 @@ int main(int argc, char **argv) {
 
                 writeFile(data);
                 printf("Added \"%s\": %s\n", data.entries[data.lineCount-1].name, data.entries[data.lineCount-1].dir);
-            } else {
-                printf("Invalid arguement for add: \"%s\"\n", argv[i+1]);
+                return 0;
             }
-        }
 
-        if (strcmp(name, "list") == 0){
-            struct file data = readFile();
-            list(data);    
-        }
-
-    }
-    return 0;
+            if (strcmp(argv[3], "-l") == 0){
+                struct file data = readFile();
+                list(data);    
+                return 0;
+            }
+        }            
 }
 
 struct file readFile() {
