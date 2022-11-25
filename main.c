@@ -26,6 +26,8 @@ struct file readFile();
 
 void writeFile(struct file data);
 
+void writeFileDelete(struct file data, char *key) ;
+
 void list(struct file data);
 
 int isvalid (char *str);
@@ -157,11 +159,27 @@ int main(int argc, char **argv) {
         if (strcmp(argv[2], "-d") == 0) {
 
             if (argv[3] == NULL) {
-                printf("%s add -a must have a NAME arguement\n", path);
+                printf("%s add -d must have a NAME arguement\n", path);
                 return 1;
             }
 
-            // Delete directory with key NAME
+            struct file data = readFile();
+            
+            int foundKey = 0;
+            for (int i = 0; i < data.lineCount; i++) {
+                if (strcmp(data.entries[i].name, argv[3]) == 0) {
+                    foundKey = 1;
+                }
+            }
+
+            if (!foundKey) {
+                printf("Directory key \"%s\" not found\n", argv[3]);
+                return 1;
+            }
+
+            printf("Deleted directory with key \"%s\"\n", argv[3]);
+
+            writeFileDelete(data, argv[3]);
 
             return 0;
         }
@@ -281,6 +299,18 @@ void writeFile(struct file data) {
     FILE *fp = fopen(SAVEFILE, "w");
     
     for (int i = 0; i < data.lineCount; i++) {
+        fprintf(fp,"%s|%s\n", data.entries[i].name, data.entries[i].dir);
+    }
+
+    fclose(fp);
+}
+
+void writeFileDelete(struct file data, char *key) {
+    FILE *fp = fopen(SAVEFILE, "w");
+    
+    for (int i = 0; i < data.lineCount; i++) {
+        if (strcmp(data.entries[i].name, key) == 0) continue;
+
         fprintf(fp,"%s|%s\n", data.entries[i].name, data.entries[i].dir);
     }
 
