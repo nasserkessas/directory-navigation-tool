@@ -51,7 +51,43 @@ int main(int argc, char **argv) {
 
     if (strcmp(name, "store") == 0) {
         if (argv[2] == NULL){
-            // Store current directory with an incremented number as the key
+
+            struct file data = readFile();
+
+            if (data.lineCount == NUM_LINES-1) {
+                printf("The maximum amount of saved directories (%d) has already been reached\n", NUM_LINES-1);
+                return 1;
+            }
+
+
+            int highestFoundKey = 0;
+            char converted[16];
+
+            for (int i = 0; i < data.lineCount; i++) {
+                sprintf(converted, "%d", highestFoundKey+1);
+
+                if (strcmp(data.entries[i].name, converted) == 0) {
+                    i = 0;
+                    highestFoundKey++;
+                }
+            }
+
+            char cwd[DIR_LENGTH];
+            if (getcwd(cwd, sizeof(cwd)) == NULL) {
+                printf("Failed to get current woking directory\n");
+                return 1;
+            }
+
+            struct dirEntry newDir;
+            strcpy(newDir.name, converted);
+            strcpy(newDir.dir, cwd);
+
+            data.entries[data.lineCount] = newDir;
+            data.lineCount++;
+
+            writeFile(data);
+            printf("Added \"%s\": %s\n", data.entries[data.lineCount-1].name, data.entries[data.lineCount-1].dir);
+
             return 0;
         }
         if (strcmp(argv[2], "-a") == 0) {
