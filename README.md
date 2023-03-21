@@ -48,3 +48,14 @@ Changes directory to default or first listed directory
 #### Options
 
  + `-n "NAME"`  Changes directory to stored value with key NAME
+
+## Todo
+- Convert to bash script?
+
+## Acknoledgements
+Created by Nasser Kessas
+
+## Contributing
+PRs accepted, feel free to dive in! [Open an issue](https://github.com/nasserkessas/directory-navigation-tool/issues/new) or submit PRs.
+
+Directory Navigation Tool (`nv`) follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
