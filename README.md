@@ -27,3 +27,23 @@ chmod 755 /usr/bin/nv
 
 ## Usage
 
+### `store`
+
+Stores current directory with an incremented number as the key
+
+#### Options
+
+ + `-a "NAME"` Adds the current directory with NAME as the key
+ <br>
+ &emsp;`--set-default`: Sets added directory to default position
+ + `-d` "NAME": Deletes directory with key NAME
+ + `-l`: Lists all stored directories and keys
+ + `-f`: Prints save file location
+<br>
+### `move`
+
+Changes directory to default or first listed directory
+
+#### Options
+
+ + `-n "NAME"`  Changes directory to stored value with key NAME
