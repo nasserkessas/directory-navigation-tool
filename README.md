@@ -40,6 +40,7 @@ Stores current directory with an incremented number as the key
  + `-l`: Lists all stored directories and keys
  + `-f`: Prints save file location
 <br>
+
 ### `move`
 
 Changes directory to default or first listed directory
