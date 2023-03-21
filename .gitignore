@@ -55,7 +55,7 @@ dkms.conf
 .vscode
 
 # Directory Save File
-.dirsave
+.nvsave
 
 # Binary folder
 bin
