@@ -57,5 +57,5 @@ dkms.conf
 # Directory Save File
 .dirsave
 
-# Source Binary File
-main
+# Binary folder
+bin
