@@ -15,12 +15,15 @@ Compile:
 gcc -o nv main.c
 ```
 
-Change permissions to "executable"
-```sh
-chmod -x nv
-```
-
 Copy to /usr/bin (to exectute like `$ nv`)
 ```sh
-sudo cp ./nv /usr/bin
+cp ./nv /usr/bin
 ```
+
+Change file permissions
+```sh
+chmod 755 /usr/bin/nv
+```
+
+## Usage
+
