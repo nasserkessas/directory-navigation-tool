@@ -8,7 +8,7 @@
 #define NUM_LINES 16
 #define NAME_LENGTH 16
 #define DIR_LENGTH 256
-#define SAVEFILE "./.dirsave"
+#define SAVENAME ".nvsave"
 
 struct dirEntry {
     char name[NAME_LENGTH];
@@ -32,10 +32,8 @@ void list(struct file data);
 
 int isvalid (char *str);
 
-// new shell option
-
 void usage(char *path) {
-    printf("\nUsage: %s [COMMANDS]\n\n\tstore \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t\t--set-default  Sets added directory to default position\n\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\n\tmove \tChanges directory to default or first listed directory\n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\n", path);
+    printf("\nUsage: %s [COMMANDS]\n\n\tstore \tStores current directory with an incremented number as the key\n\t\t-a \"NAME\"  Adds the current directory with NAME as the key\n\t\t\t--set-default  Sets added directory to default position\n\n\t\t-d \"NAME\"  Deletes directory with key NAME\n\t\t-l         Lists all stored directories and keys\n\t\t-f         Prints save file location\n\n\tmove \tChanges directory to default or first listed directory\n\t\t-n \"NAME\"  Changes directory to stored value with key NAME\n\n", path);
 }
 
 int main(int argc, char **argv) {
@@ -90,6 +88,19 @@ int main(int argc, char **argv) {
 
             return 0;
         }
+
+        if (strcmp(argv[2], "-f") == 0) {
+            char saveloc[64] = { 0 };
+
+            strcat(saveloc, getenv("HOME"));
+            strcat(saveloc, "/");
+            strcat(saveloc, SAVENAME);
+
+            printf("Current directory save location: %s\n", saveloc);
+
+            return 0;
+        }
+
         if (strcmp(argv[2], "-a") == 0) {
 
             if (argv[3] == NULL) {
@@ -266,8 +277,8 @@ int main(int argc, char **argv) {
             struct file data = readFile();
             
             int foundKey = 0;
-            for (int i = 0; i < data.lineCount; i++) {
-                if (strcmp(data.entries[i].name, argv[3]) == 0) {
+            for (int i = 1; i < data.lineCount+1; i++) {
+                if (strcmp(data.entries[i-1].name, argv[3]) == 0) {
                     foundKey = i;
                 }
             }
@@ -278,7 +289,7 @@ int main(int argc, char **argv) {
             }
             
             char command[260] = "cd ";
-            strcat(command, data.entries[foundKey].dir);
+            strcat(command, data.entries[foundKey-1].dir);
             strcat(command, "\r");
 
             inject_shell(command);
@@ -306,9 +317,14 @@ void inject_shell(char *cmd){
 }
 
 struct file readFile() {
-    FILE *fp = fopen(SAVEFILE, "r");
+    char saveloc[64] = { 0 };
+    strcat(saveloc, getenv("HOME"));
+    strcat(saveloc, "/");
+    strcat(saveloc, SAVENAME);
+
+    FILE *fp = fopen(saveloc, "r");
     if (!fp) {
-        printf("Error opening file %s\n", SAVEFILE);
+        printf("Error opening file %s\n", saveloc);
         struct file ret;
         exit(1);
     }
@@ -332,7 +348,13 @@ struct file readFile() {
 }
 
 void writeFile(struct file data) {
-    FILE *fp = fopen(SAVEFILE, "w");
+    char saveloc[64] = { 0 };
+
+    strcat(saveloc, getenv("HOME"));
+    strcat(saveloc, "/");
+    strcat(saveloc, SAVENAME);
+
+    FILE *fp = fopen(saveloc, "w");
     
     for (int i = 0; i < data.lineCount; i++) {
         fprintf(fp,"%s|%s\n", data.entries[i].name, data.entries[i].dir);
@@ -342,8 +364,12 @@ void writeFile(struct file data) {
 }
 
 void writeFileDelete(struct file data, char *key) {
-    FILE *fp = fopen(SAVEFILE, "w");
-    
+    char saveloc[64] = { 0 };
+    strcat(saveloc, getenv("HOME"));
+    strcat(saveloc, "/");
+    strcat(saveloc, SAVENAME);
+    FILE *fp = fopen(saveloc, "w");
+
     for (int i = 0; i < data.lineCount; i++) {
         if (strcmp(data.entries[i].name, key) == 0) continue;
 
