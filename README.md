@@ -12,12 +12,12 @@ $ nv
 
 Compile:
 ```sh
-gcc -o nv main.c
+gcc -o bin/nv main.c
 ```
 
 Copy to /usr/bin (to exectute like `$ nv`)
 ```sh
-cp ./nv /usr/bin
+cp ./bin/nv /usr/bin
 ```
 
 Change file permissions
